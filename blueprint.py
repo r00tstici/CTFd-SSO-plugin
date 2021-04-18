@@ -1,5 +1,4 @@
 from flask import Blueprint, redirect, url_for, session
-from .controllers import ConfigController
 
 from CTFd.models import Users, db
 from CTFd.utils.security.auth import login_user

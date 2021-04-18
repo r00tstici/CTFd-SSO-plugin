@@ -4,7 +4,6 @@ import json
 import os
 
 from .blueprint import load_bp
-from .controllers import ConfigController
 
 from flask_oidc import OpenIDConnect
 
