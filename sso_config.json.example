@@ -1,0 +1,14 @@
+{
+    "web": {
+        "issuer": "",
+        "auth_uri": "",
+        "client_id": "",
+        "client_secret": "",
+        "redirect_uris": [
+            ""
+        ],
+        "userinfo_uri": "",
+        "token_uri": "",
+        "token_introspection_uri": ""
+    }
+}
