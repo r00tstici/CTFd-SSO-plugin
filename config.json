@@ -1,0 +1,4 @@
+{
+    "name": "ctfd-sso",
+    "route": "/admin/sso"
+}
