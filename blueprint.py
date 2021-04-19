@@ -3,6 +3,7 @@ from flask import Blueprint, redirect, url_for, session, request
 from CTFd.models import Users, db
 from CTFd.utils import get_app_config, get_config
 from CTFd.cache import clear_user_session
+from CTFd.utils.config.visibility import registration_visible
 from CTFd.utils.security.auth import login_user
 from CTFd.utils.helpers import error_for
 from CTFd.utils.logging import log
@@ -19,13 +20,11 @@ def load_bp(app):
         endpoint = get_app_config('OAUTH_AUTHORIZATION_ENDPOINT')
         redirect_uri = url_for('.sso_redirect', _external = True)
         client_id = get_app_config('OAUTH_CLIENT_ID')
-        scope = 'profile'
+        scope = 'profile roles'
 
         redirect_url = "{endpoint}?redirect_uri={redirect_uri}&response_type=code&client_id={client_id}&scope={scope}&state={state}".format(
             redirect_uri=redirect_uri, endpoint=endpoint, client_id=client_id, scope=scope, state=session["nonce"]
         )
-
-        print(redirect_uri)
 
         return redirect(redirect_url)
 
@@ -70,6 +69,7 @@ def load_bp(app):
                 user_id = api_data["sub"]
                 user_name = api_data["preferred_username"]
                 user_email = api_data["email"]
+                user_roles = api_data.get("roles")
 
                 user = Users.query.filter_by(email=user_email).first()
                 if user is None:
@@ -96,6 +96,13 @@ def load_bp(app):
                     user.verified = True
                     db.session.commit()
                     clear_user_session(user_id=user.id)
+
+                user_role = user_roles[0] if user_roles is not None and len(user_roles) > 0 and user_roles[0] in ["admin"] else "user"
+                print(user_role)
+                if user_role != user.type:
+                    user.type = user_role
+                    db.session.commit()
+                    user = Users.query.filter_by(email=user_email).first()
 
                 login_user(user)
 
