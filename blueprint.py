@@ -22,6 +22,14 @@ def load_bp(app):
         client_id = get_app_config('OAUTH_CLIENT_ID')
         scope = 'profile roles'
 
+        if client_id is None or endpoint is None:
+            error_for(
+                endpoint="auth.login",
+                message="OAuth Settings not configured. "
+                "Ask your CTF administrator to configure SSO integration.",
+            )
+            return redirect(url_for("auth.login"))
+
         redirect_url = "{endpoint}?redirect_uri={redirect_uri}&response_type=code&client_id={client_id}&scope={scope}&state={state}".format(
             redirect_uri=redirect_uri, endpoint=endpoint, client_id=client_id, scope=scope, state=session["nonce"]
         )
@@ -63,8 +71,7 @@ def load_bp(app):
                     "Authorization": "Bearer " + str(token),
                     "Content-type": "application/json",
                 }
-                r = requests.get(url=user_url, headers=headers)
-                api_data = r.json()
+                api_data = requests.get(url=user_url, headers=headers).json()
 
                 user_name = api_data["preferred_username"]
                 user_email = api_data["email"]
