@@ -66,7 +66,6 @@ def load_bp(app):
                 r = requests.get(url=user_url, headers=headers)
                 api_data = r.json()
 
-                user_id = api_data["sub"]
                 user_name = api_data["preferred_username"]
                 user_email = api_data["email"]
                 user_roles = api_data.get("roles")
@@ -78,7 +77,6 @@ def load_bp(app):
                         user = Users(
                             name=user_name,
                             email=user_email,
-                            oauth_id=user_id,
                             verified=True,
                         )
                         db.session.add(user)
@@ -91,11 +89,8 @@ def load_bp(app):
                         )
                         return redirect(url_for("auth.login"))
 
-                if user.oauth_id is None:
-                    user.oauth_id = user_id
-                    user.verified = True
-                    db.session.commit()
-                    clear_user_session(user_id=user.id)
+                user.verified = True
+                db.session.commit()
 
                 user_role = user_roles[0] if user_roles is not None and len(user_roles) > 0 and user_roles[0] in ["admin"] else "user"
                 print(user_role)
@@ -103,6 +98,7 @@ def load_bp(app):
                     user.type = user_role
                     db.session.commit()
                     user = Users.query.filter_by(email=user_email).first()
+                    clear_user_session(user_id=user.id)
 
                 login_user(user)
 
