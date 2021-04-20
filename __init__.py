@@ -10,13 +10,6 @@ CONFIG = json.load(open("{}/config.json".format(PLUGIN_PATH)))
 
 def load(app):
 
-    app.config['SERVER_NAME']                   = ''
-    app.config['OAUTH_AUTHORIZATION_ENDPOINT']  = ''
-    app.config['OAUTH_CLIENT_ID']               = ''
-    app.config['OAUTH_TOKEN_ENDPOINT']          = ''
-    app.config['OAUTH_API_ENDPOINT']            = ''
-    app.config['OAUTH_CLIENT_SECRET']           = ''
-
     app.db.create_all()
 
     bp = load_bp(app)
