@@ -99,13 +99,13 @@ def load_bp(app):
                 user.verified = True
                 db.session.commit()
 
-                user_role = user_roles[0] if user_roles is not None and len(user_roles) > 0 and user_roles[0] in ["admin"] else "user"
-                print(user_role)
-                if user_role != user.type:
-                    user.type = user_role
-                    db.session.commit()
-                    user = Users.query.filter_by(email=user_email).first()
-                    clear_user_session(user_id=user.id)
+                if user_roles is not None and len(user_roles) > 0 and user_roles[0] in ["admin", "user"]:
+                    user_role = user_roles[0]
+                    if user_role != user.type:
+                        user.type = user_role
+                        db.session.commit()
+                        user = Users.query.filter_by(email=user_email).first()
+                        clear_user_session(user_id=user.id)
 
                 login_user(user)
 
