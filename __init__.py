@@ -13,7 +13,7 @@ CONFIG = json.load(open("{}/config.json".format(PLUGIN_PATH)))
 
 
 def load(app):
-    if get_app_config("OAUTH_CREATE_BUTTON") == "true":
+    if get_app_config("OAUTH_CREATE_BUTTON") == True:
         update_template(app)
 
     bp = load_bp(app)
