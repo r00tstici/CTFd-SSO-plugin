@@ -19,8 +19,9 @@ Works perfectly with KeyCloak
      - OAUTH_TOKEN_ENDPOINT =
      - OAUTH_API_ENDPOINT =
      - OAUTH_ALWAYS_POSSIBLE =
+     - OAUTH_CREATE_BUTTON =
 
-3. Login via SSO will be available visiting `/sso/login`. You may want to add a button to your theme.
+3. Login via SSO will be available visiting `/sso/login`. If you enable `OAUTH_CREATE_BUTTON`, the plugin will attempt to automatically create a "Log in with SSO" button in the login page. Othewise you may want to add a button in your theme.
 
 ## Config parameters
 
@@ -34,7 +35,8 @@ Works perfectly with KeyCloak
 - `OAUTH_AUTHORIZATION_ENDPOINT`: OAuth2 endpoint for user login
 - `OAUTH_TOKEN_ENDPOINT`: OAuth2 endpoint to get an access token
 - `OAUTH_API_ENDPOINT`: OAuth2 endpoint to get user info from the Identity Provider
-- `OAUTH_ALWAYS_POSSIBLE`: Allow registration via OAuth even if the registration is private
+- `OAUTH_ALWAYS_POSSIBLE`: Allow registration via OAuth even if the registration is private. Must be `true` or `false`
+- `OAUTH_CREATE_BUTTON`: Insert a "Log in with SSO" button in the login page template. Must be `true` or `false`
 
 ## Admin accounts
 
