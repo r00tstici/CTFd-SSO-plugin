@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+	<div class="container">
+		<h1>OAuth2 clients
+			<a class="no-decoration" href="{{ url_for('sso.sso_create') }}">
+				<span role="button" data-toggle="tooltip" title="Add client">
+					<i class="btn-fa fas fa-plus-circle"></i>
+				</span>
+			</a>
+		</h1>
+	</div>
+</div>
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="float-right pb-3">
+				<div class="btn-group" role="group">
+					<button type="button" class="btn btn-outline-danger" data-toggle="tooltip" title="Delete client" id="oauth-clients-delete-button">
+						<i class="btn-fa fas fa-trash-alt"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			<div>
+				<table id="clients" class="table table-striped border">
+					<thead>
+					<tr>
+						<td class="d-block border-right border-bottom text-center" data-checkbox>
+							<div class="form-check">
+								<input type="checkbox" class="form-check-input" data-checkbox-all>&nbsp;
+							</div>
+						</td>
+						<th class="sort-col text-center"><b>ID</b></th>
+						<th class="sort-col"><b>Name</b></th>
+					</tr>
+					</thead>
+					<tbody>
+					{% for client in oauth_clients() %}
+						<tr>
+							<td class="d-block border-right text-center" data-checkbox>
+								<div class="form-check">
+									<input type="checkbox" class="form-check-input" value="{{ client.id }}" data-client-id="{{ client.id }}">&nbsp;
+								</div>
+							</td>
+							<td class="text-center">{{ client.id }}</td>
+							<td><a href="{{ url_for('sso.sso_details', client_id=client.id) }}">{{ client.name }}</a></td>
+						</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ url_for('sso.static', filename='js/clients.js') }}"></script>
+{% endblock %}

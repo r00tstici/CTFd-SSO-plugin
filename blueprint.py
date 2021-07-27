@@ -1,28 +1,97 @@
-from flask import Blueprint, redirect, url_for, session, request
+from flask import Blueprint, redirect, render_template, request, url_for
+from wtforms import StringField
+from wtforms.validators import InputRequired
 
+from CTFd.cache import clear_user_session
+from CTFd.forms import BaseForm
+from CTFd.forms.fields import SubmitField
 from CTFd.models import Users, db
 from CTFd.utils import get_app_config
-from CTFd.cache import clear_user_session
 from CTFd.utils.config.visibility import registration_visible
-from CTFd.utils.security.auth import login_user
+from CTFd.utils.decorators import admins_only
 from CTFd.utils.helpers import error_for
 from CTFd.utils.logging import log
+from CTFd.utils.security.auth import login_user
 
-plugin_bp = Blueprint('sso', __name__, template_folder='templates')
+from .models import OAuthClients
+
+plugin_bp = Blueprint('sso', __name__, template_folder='templates', static_folder='static', static_url_path='/static/sso')
 
 
-def load_bp(app, oauth):
+class OAuthForm(BaseForm):
+    name = StringField("Client name", validators=[InputRequired()])
+    client_id = StringField("OAuth client id", validators=[InputRequired()])
+    client_secret = StringField("OAuth client secret", validators=[InputRequired()])
+    access_token_url = StringField("Access token url", validators=[InputRequired()])
+    authorize_url = StringField("Authorization url", validators=[InputRequired()])
+    api_base_url = StringField("User info url", validators=[InputRequired()])
+    submit = SubmitField("Add")
 
-    @plugin_bp.route("/sso/login", methods = ['GET'])
-    def sso_oauth():
-        redirect_uri=url_for('.sso_redirect', _external=True)
-        return oauth.client.authorize_redirect(redirect_uri)
 
-    @plugin_bp.route("/sso/redirect", methods = ['GET'])
-    def sso_redirect():
-        oauth.client.authorize_access_token()
-        userinfo_endpoint = get_app_config("OAUTH_API_ENDPOINT")
-        api_data = oauth.client.get(userinfo_endpoint).json()
+def load_bp(oauth):
+
+    @plugin_bp.route('/admin/sso')
+    @admins_only
+    def sso_list():
+        return render_template('list.html')
+
+
+    @plugin_bp.route('/admin/sso/client/<int:client_id>', methods = ['GET', 'DELETE'])
+    @admins_only
+    def sso_details(client_id):
+        if request.method == 'DELETE':
+            client = OAuthClients.query.filter_by(id=client_id).first()
+            if client:
+                client.disconnect(oauth)
+                db.session.delete(client)
+                db.session.commit()
+                db.session.flush()
+        return redirect(url_for('sso.sso_list'))
+
+
+    @plugin_bp.route('/admin/sso/create', methods = ['GET', 'POST'])
+    @admins_only
+    def sso_create():
+        if request.method == "POST":
+            name = request.form["name"]
+            client_id = request.form["client_id"]
+            client_secret = request.form["client_secret"]
+            access_token_url = request.form["access_token_url"]
+            authorize_url = request.form["authorize_url"]
+            api_base_url = request.form["api_base_url"]
+
+            client = OAuthClients(
+                name=name,
+                client_id=client_id,
+                client_secret=client_secret,
+                access_token_url=access_token_url,
+                authorize_url=authorize_url,
+                api_base_url=api_base_url
+            )
+            db.session.add(client)
+            db.session.commit()
+            db.session.flush()
+
+            client.register(oauth)
+
+            return redirect(url_for('sso.sso_list'))
+
+        form = OAuthForm()
+        return render_template('create.html', form=form)
+
+
+    @plugin_bp.route("/sso/login/<int:client_id>", methods = ['GET'])
+    def sso_oauth(client_id):
+        client = oauth.create_client(client_id)
+        redirect_uri=url_for('sso.sso_redirect', client_id=client_id, _external=True)
+        return client.authorize_redirect(redirect_uri)
+
+
+    @plugin_bp.route("/sso/redirect/<int:client_id>", methods = ['GET'])
+    def sso_redirect(client_id):
+        client = oauth.create_client(client_id)
+        client.authorize_access_token()
+        api_data = client.get('').json()
 
         user_name = api_data["preferred_username"]
         user_email = api_data["email"]
