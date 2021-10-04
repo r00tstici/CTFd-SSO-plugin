@@ -27,7 +27,7 @@ def update_login_template(app):
     """
 
     environment = app.jinja_environment
-    original = app.theme_loader.get_source(environment, 'login.html')[0]
+    original = app.jinja_loader.get_source(environment, 'login.html')[0]
 
     match = re.search(".*Forms\.auth\.LoginForm.*\n", original)
 
