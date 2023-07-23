@@ -25,6 +25,8 @@ class OAuthForm(BaseForm):
     access_token_url = StringField("Access token url", validators=[InputRequired()])
     authorize_url = StringField("Authorization url", validators=[InputRequired()])
     api_base_url = StringField("User info url", validators=[InputRequired()])
+    admin_role = StringField("Admin SSO role", validators=[InputRequired()])
+    user_role = StringField("User SSO role", validators=[InputRequired()])
     submit = SubmitField("Add")
 
 
@@ -59,6 +61,8 @@ def load_bp(oauth):
             access_token_url = request.form["access_token_url"]
             authorize_url = request.form["authorize_url"]
             api_base_url = request.form["api_base_url"]
+            admin_role = request.form["admin_role"]
+            user_role = request.form["user_role"]
 
             client = OAuthClients(
                 name=name,
@@ -66,7 +70,9 @@ def load_bp(oauth):
                 client_secret=client_secret,
                 access_token_url=access_token_url,
                 authorize_url=authorize_url,
-                api_base_url=api_base_url
+                api_base_url=api_base_url,
+                admin_role=admin_role,
+                user_role=user_role
             )
             db.session.add(client)
             db.session.commit()
@@ -119,7 +125,7 @@ def load_bp(oauth):
         user.verified = True
         db.session.commit()
 
-        if user_roles is not None and len(user_roles) > 0 and user_roles[0] in ["admin", "user"]:
+        if user_roles is not None and len(user_roles) > 0 and user_roles[0] in [OAuthClients.query.filter_by(client_id=client_id).first().admin_role, OAuthClients.query.filter_by(client_id=client_id).first().user_role]:
             user_role = user_roles[0]
             if user_role != user.type:
                 user.type = user_role

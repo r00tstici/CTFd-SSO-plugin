@@ -11,6 +11,8 @@ class OAuthClients(db.Model):
     access_token_url = db.Column(db.Text)
     authorize_url = db.Column(db.Text)
     api_base_url = db.Column(db.Text)
+    admin_role = db.Column(db.Text)
+    user_role = db.Column(db.Text)
 
     # In a later update you will be able to customize the login button 
     color = db.Column(db.Text)
@@ -24,6 +26,8 @@ class OAuthClients(db.Model):
             access_token_url=self.access_token_url,
             authorize_url=self.authorize_url,
             api_base_url=self.api_base_url,
+            admin_role=self.admin_role,
+            user_role=self.user_role,
             client_kwargs={'scope': 'profile roles'}
         )
 
