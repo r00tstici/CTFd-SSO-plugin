@@ -25,8 +25,8 @@ class OAuthForm(BaseForm):
     access_token_url = StringField("Access token url", validators=[InputRequired()])
     authorize_url = StringField("Authorization url", validators=[InputRequired()])
     api_base_url = StringField("User info url", validators=[InputRequired()])
-    admin_role = StringField("Admin SSO role", validators=[InputRequired()])
-    user_role = StringField("User SSO role", validators=[InputRequired()])
+    admin_role = StringField("Admin SSO role", validators=[InputRequired()], default=  "admin")
+    user_role = StringField("User SSO role", validators=[InputRequired()], default = "user")
     submit = SubmitField("Add")
 
 
@@ -82,6 +82,8 @@ def load_bp(oauth):
 
             return redirect(url_for('sso.sso_list'))
 
+        form.admin_role.data = "admin"
+        form.user_role.data = "user"
         form = OAuthForm()
         return render_template('create.html', form=form)
 
