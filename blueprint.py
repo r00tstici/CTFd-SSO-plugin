@@ -98,15 +98,18 @@ def load_bp(oauth):
         client = oauth.create_client(client_id)
         client.authorize_access_token()
         api_data = client.get('').json()
-
         user_name = api_data["preferred_username"]
         user_email = api_data["email"]
-        user_roles = api_data.get("roles")
+        if len(str(get_app_config("OAUTH_ROLES_SCOPE")).replace('\"', '')) > 0:
+            user_roles = api_data.get(str(get_app_config("OAUTH_ROLES_SCOPE")).replace('\"', ''))
+        else:
+            user_roles = api_data.get("roles")
+        print(user_roles)
 
         user = Users.query.filter_by(email=user_email).first()
         if user is None:
             # Check if we are allowing registration before creating users
-            if registration_visible() or get_app_config("OAUTH_ALWAYS_POSSIBLE") == True:
+            if registration_visible() or get_app_config("OAUTH_ALWAYS_POSSIBLE").lower() == "true":
                 user = Users(
                     name=user_name,
                     email=user_email,
@@ -124,15 +127,18 @@ def load_bp(oauth):
 
         user.verified = True
         db.session.commit()
-
-        if user_roles is not None and len(user_roles) > 0 and user_roles[0] in [OAuthClients.query.filter_by(client_id=client_id).first().admin_role, OAuthClients.query.filter_by(client_id=client_id).first().user_role]:
+        if user_roles is not None and len(user_roles) > 0 and (user_roles[0] in OAuthClients.query.filter_by(id=client_id).first().admin_role.replace(" ", "").split(",") or user_roles[0] in OAuthClients.query.filter_by(id=client_id).first().user_role.replace(" ", "").split(",")):
             user_role = user_roles[0]
+            if user_role in OAuthClients.query.filter_by(id=client_id).first().admin_role.replace(" ", "").split(","):
+                user_role = "admin"
+            if user_role in OAuthClients.query.filter_by(id=client_id).first().user_role.replace(" ", "").split(","):
+                user_role = "user"
+            print(user_role)
             if user_role != user.type:
                 user.type = user_role
                 db.session.commit()
                 user = Users.query.filter_by(email=user_email).first()
                 clear_user_session(user_id=user.id)
-
         login_user(user)
 
         return redirect(url_for("challenges.listing"))

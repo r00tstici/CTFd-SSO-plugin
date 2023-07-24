@@ -59,7 +59,7 @@ def load(app):
     app.jinja_env.globals.update(oauth_clients=oauth_clients)
 
     # Update the login template
-    if get_app_config("OAUTH_CREATE_BUTTONS") == True:
+    if get_app_config("OAUTH_CREATE_BUTTONS").lower() == "true":
         update_login_template(app)
 
     # Register the blueprint containing the routes

@@ -1,4 +1,5 @@
 from CTFd.models import db
+from CTFd.utils import get_app_config
 
 
 class OAuthClients(db.Model):
@@ -19,6 +20,11 @@ class OAuthClients(db.Model):
     icon = db.Column(db.Text)
 
     def register(self, oauth):
+        if len(str(get_app_config("OAUTH_ALL_SCOPES")).replace('\"', '')) > 0:
+            local_client_kwargs={'scope': str(get_app_config("OAUTH_ALL_SCOPES")).replace('\"', '')}
+        else:
+            local_client_kwargs={'scope': 'profile roles'}
+        print(local_client_kwargs)
         oauth.register(
             name=self.id,
             client_id=self.client_id,
@@ -28,7 +34,8 @@ class OAuthClients(db.Model):
             api_base_url=self.api_base_url,
             admin_role=self.admin_role,
             user_role=self.user_role,
-            client_kwargs={'scope': 'profile roles'}
+            client_kwargs=local_client_kwargs
+            
         )
 
     def disconnect(self, oauth):
