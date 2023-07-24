@@ -20,11 +20,10 @@ class OAuthClients(db.Model):
     icon = db.Column(db.Text)
 
     def register(self, oauth):
-        if len(str(get_app_config("OAUTH_ALL_SCOPES")).replace('\"', '')) > 0:
+        if get_app_config("OAUTH_ALL_SCOPES") is not None and len(str(get_app_config("OAUTH_ALL_SCOPES")).replace('\"', '')) > 0:
             local_client_kwargs={'scope': str(get_app_config("OAUTH_ALL_SCOPES")).replace('\"', '')}
         else:
             local_client_kwargs={'scope': 'profile roles'}
-        print(local_client_kwargs)
         oauth.register(
             name=self.id,
             client_id=self.client_id,

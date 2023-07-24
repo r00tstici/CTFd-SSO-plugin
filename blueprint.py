@@ -82,9 +82,9 @@ def load_bp(oauth):
 
             return redirect(url_for('sso.sso_list'))
 
+        form = OAuthForm()
         form.admin_role.data = "admin"
         form.user_role.data = "user"
-        form = OAuthForm()
         return render_template('create.html', form=form)
 
 
@@ -102,7 +102,7 @@ def load_bp(oauth):
         api_data = client.get('').json()
         user_name = api_data["preferred_username"]
         user_email = api_data["email"]
-        if len(str(get_app_config("OAUTH_ROLES_SCOPE")).replace('\"', '')) > 0:
+        if get_app_config("OAUTH_ROLES_SCOPE") is not None and len(str(get_app_config("OAUTH_ROLES_SCOPE")).replace('\"', '')) > 0:
             user_roles = api_data.get(str(get_app_config("OAUTH_ROLES_SCOPE")).replace('\"', ''))
         else:
             user_roles = api_data.get("roles")
