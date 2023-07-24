@@ -36,6 +36,14 @@
 					<b>{{ form.api_base_url.label }}</b>
 					{{ form.api_base_url(class="form-control", value=api_base_url) }}
 				</div>
+				<div class="form-group">
+					<b>{{ form.admin_role.label }}</b>
+					{{ form.admin_role(class="form-control", value=form.admin_role.data) }}
+				</div>
+				<div class="form-group">
+					<b>{{ form.user_role.label }}</b>
+					{{ form.user_role(class="form-control", value=form.user_role.data) }}
+				</div>
 				<div class="row">
 					<div class="col">
 						{{ form.submit(class="btn btn-md btn-primary btn-outlined") }}
